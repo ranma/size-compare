@@ -106,6 +106,7 @@ async function main() {
   const gistOctokit = getOctokit(gistToken);
   const baseOctokit = getOctokit(githubToken);
 
+  debug('Reading data from gist: ' + gistId)
   const gist = await gistOctokit.rest.gists.get({gist_id: gistId});
   const gistFiles: Record<string, {content: string; filename: string}> = {};
 
@@ -121,6 +122,7 @@ async function main() {
       };
     }
   });
+  debug('gist.data: ' + JSON.stringify(gist.data))
 
   const currentHistoryRecord: HistoryRecord = {
     unixtimestamp: Date.now(),
@@ -137,6 +139,7 @@ async function main() {
   });
   const originalFileContent = historyFile.content;
   const historyFileContent = HistoryFile.check(JSON.parse(originalFileContent));
+  debug('History content: ' + JSON.stringify(historyFileContent))
 
   // Note: a history is written in reversed chronological order: the latest record is the first in the list
   const latestRecord = historyFileContent.history[0] ?? currentHistoryRecord;
