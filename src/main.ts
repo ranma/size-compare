@@ -114,6 +114,7 @@ async function main() {
     const file = gist.data.files?.[key];
     if (file) {
       const filename = file.filename ?? key;
+      debug('Found gist file: ' + filename)
       gistFiles[filename] = {
         filename,
         content: file.content ?? '',
@@ -138,7 +139,7 @@ async function main() {
   const historyFileContent = HistoryFile.check(JSON.parse(originalFileContent));
 
   // Note: a history is written in reversed chronological order: the latest record is the first in the list
-  const latestRecord = historyFileContent.history[0];
+  const latestRecord = historyFileContent.history[0] ?? currentHistoryRecord;
   debug('Latest record resolved: ' + JSON.stringify(latestRecord, null, 2));
 
   if (pull_request) {
