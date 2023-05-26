@@ -17,6 +17,8 @@
     "@octokit/action": "^4.0.8",
     "gzip-size": "^7.0.0",
     "markdown-table": "3.0.2",
+    "ncc": "^0.3.6",
+    "pnpm": "^8.5.1",
     "pretty-bytes": "^6.0.0"
   },
   "devDependencies": {

@@ -113,6 +113,7 @@ async function main() {
   // Read each file from gist to do not lose them on updating gist
   Object.keys(gist.data.files!).forEach((key) => {
     const file = gist.data.files?.[key];
+    debug('file: ' + key)
     if (file) {
       const filename = file.filename ?? key;
       debug('Found gist file: ' + filename)
@@ -122,7 +123,7 @@ async function main() {
       };
     }
   });
-  debug('gist.data: ' + JSON.stringify(gist.data))
+  debug('gist.data.files: ' + JSON.stringify(gist.data.files))
 
   const currentHistoryRecord: HistoryRecord = {
     unixtimestamp: Date.now(),
@@ -211,7 +212,7 @@ async function main() {
       (record) => record.commitsha === sha,
     );
     const previousChanges =
-      historyFileContent.history[recordForThisCommitIndex - 1] ?? historyFileContent.history[0];
+      historyFileContent.history[recordForThisCommitIndex - 1] ?? currentHistoryRecord;
     const alreadyCheckedSizeByHistory = recordForThisCommitIndex !== -1;
 
     if (alreadyCheckedSizeByHistory) {
