@@ -14953,11 +14953,11 @@ const HistoryFile = lib.Record({
     history: lib.Array(HistoryRecord),
 });
 function main() {
-    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         const gistId = (0,core.getInput)('gist_id', { required: true });
         const githubToken = (0,core.getInput)('github_token', { required: true });
         const gistToken = (0,core.getInput)('gist_token', { required: false }) || githubToken;
+        const compareAgainst = (0,core.getInput)('compare_against', { required: false });
         const files = (0,core.getInput)('files', { required: true });
         const { payload: { pull_request, repository, compare: compareLink, commits }, repo: { owner, repo }, sha, eventName, ref, } = github.context;
         const masterBranch = repository === null || repository === void 0 ? void 0 : repository.master_branch;
@@ -15019,7 +15019,17 @@ function main() {
         const historyFileContent = HistoryFile.check(JSON.parse(originalFileContent));
         (0,core.debug)('History content: ' + JSON.stringify(historyFileContent));
         // Note: a history is written in reversed chronological order: the latest record is the first in the list
-        const latestRecord = (_a = historyFileContent.history[0]) !== null && _a !== void 0 ? _a : currentHistoryRecord;
+        const latestRecord = (() => {
+            var _a, _b;
+            if (compareAgainst) {
+                const filtered = historyFileContent.history.filter((r) => {
+                    return r.commitsha == compareAgainst;
+                });
+                (0,core.debug)('Filtered records: ' + JSON.stringify(filtered));
+                return (_a = filtered[0]) !== null && _a !== void 0 ? _a : currentHistoryRecord;
+            }
+            return (_b = historyFileContent.history[0]) !== null && _b !== void 0 ? _b : currentHistoryRecord;
+        })();
         (0,core.debug)('Latest record resolved: ' + JSON.stringify(latestRecord, null, 2));
         if (pull_request) {
             (0,core.debug)('Start Pull Request scenario');
@@ -15069,7 +15079,7 @@ function main() {
         if (!pull_request && ref === `refs/heads/${masterBranch}`) {
             (0,core.debug)(`Not pull request and current branch "${ref}" is the master "${masterBranch}"`);
             const recordForThisCommitIndex = historyFileContent.history.findIndex((record) => record.commitsha === sha);
-            const previousChanges = (_b = historyFileContent.history[recordForThisCommitIndex - 1]) !== null && _b !== void 0 ? _b : currentHistoryRecord;
+            const previousChanges = latestRecord;
             const alreadyCheckedSizeByHistory = recordForThisCommitIndex !== -1;
             if (alreadyCheckedSizeByHistory) {
                 (0,core.debug)(`For the commit ${sha} size was already checked`);

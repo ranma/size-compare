@@ -58,6 +58,7 @@ async function main() {
   const gistId = getInput('gist_id', {required: true});
   const githubToken = getInput('github_token', {required: true});
   const gistToken = getInput('gist_token', {required: false}) || githubToken;
+  const compareAgainst = getInput('compare_against', {required: false});
   const files = getInput('files', {required: true});
 
   const {
@@ -143,7 +144,16 @@ async function main() {
   debug('History content: ' + JSON.stringify(historyFileContent))
 
   // Note: a history is written in reversed chronological order: the latest record is the first in the list
-  const latestRecord = historyFileContent.history[0] ?? currentHistoryRecord;
+  const latestRecord = (() => {
+    if (compareAgainst) {
+      const filtered = historyFileContent.history.filter((r: HistoryRecord) => {
+        return r.commitsha == compareAgainst;
+      });
+      debug('Filtered records: ' + JSON.stringify(filtered))
+      return filtered[0] ?? currentHistoryRecord;
+    }
+    return historyFileContent.history[0] ?? currentHistoryRecord;
+  })();
   debug('Latest record resolved: ' + JSON.stringify(latestRecord, null, 2));
 
   if (pull_request) {
@@ -211,8 +221,7 @@ async function main() {
     const recordForThisCommitIndex = historyFileContent.history.findIndex(
       (record) => record.commitsha === sha,
     );
-    const previousChanges =
-      historyFileContent.history[recordForThisCommitIndex - 1] ?? currentHistoryRecord;
+    const previousChanges = latestRecord;
     const alreadyCheckedSizeByHistory = recordForThisCommitIndex !== -1;
 
     if (alreadyCheckedSizeByHistory) {

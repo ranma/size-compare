@@ -13,6 +13,9 @@ inputs:
   github_token:
     description: A personal access token with "github" permission. Should be used standard token.
     required: true
+  compare_against:
+    description: Commit hash of the commit to compare against.
+    required: false
   files:
     description: A glob pattern where to find bundle files compare size for
     required: true
